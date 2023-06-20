@@ -34,25 +34,31 @@ def main():
     kk_img = pg.image.load("ex02/fig/3.png")
     #左向きのこうかとん
     kk_img = pg.transform.rotozoom(kk_img, 0, 2.0)
-    kk_img4 = pg.transform.flip(kk_img, 1, 0)  #右
-    kk_img1 = pg.transform.rotozoom(kk_img, 315, 1.0)  #左上
-    kk_img2 = pg.transform.rotozoom(kk_img4, 90, 1.0)  #上
-    kk_img3 = pg.transform.rotozoom(kk_img4, 45, 1.0)  #右上
-    kk_img5 = pg.transform.rotozoom(kk_img4, 315, 1.0)  #右下
-    kk_img6 = pg.transform.rotozoom(kk_img4, 270, 1.0)  #下
-    kk_img7 = pg.transform.rotozoom(kk_img, 45, 1.0)  #左下
+    kk_img_left = pg.transform.rotozoom(kk_img, 0, 1.0)
+    #右
+    kk_img_right = pg.transform.flip(kk_img_left, 1, 0)  
+    #左上
+    kk_img_upper_left = pg.transform.rotozoom(kk_img_left, 315, 1.0)
+    #上  
+    kk_img_upper = pg.transform.rotozoom(kk_img_right, 90, 1.0)  
+    #右上
+    kk_img_upper_right = pg.transform.rotozoom(kk_img_right, 45, 1.0)  
+    #右下
+    kk_img_lower_right = pg.transform.rotozoom(kk_img_right, 315, 1.0) 
+     #下 
+    kk_img_lower = pg.transform.rotozoom(kk_img_right, 270, 1.0)
+     #左下 
+    kk_img_lower_left = pg.transform.rotozoom(kk_img_left, 45, 1.0) 
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
-    #爆弾の大きさのリスト
-    bd_big_lst = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
     bd_imgs = []  
     #いろいろな大きさの爆弾をリストに格納
-    for r in bd_big_lst:
+    for r in range(1, 11):
         bd_img = pg.Surface((20*r, 20*r))  
         pg.draw.circle(bd_img, (255, 0, 0), (10*r, 10*r), 10*r)
         bd_img.set_colorkey((0, 0, 0))
         bd_imgs.append(bd_img)
-        bd_rct = bd_imgs[0].get_rect()
+    bd_img = bd_imgs[0]
     x = random.randint(0, WIDTH)
     y = random.randint(0, HEIGHT)
     vx = +5
@@ -62,9 +68,10 @@ def main():
     #爆弾rect(bg_rct)の中心座標を乱数で指定する
     bd_rct.center = x, y
 
-    kk_zisyo = {(-5, 0): kk_img, (-5, -5): kk_img1, (0, -5): kk_img2,
-                (5, -5): kk_img3, (5, 0): kk_img4, (5, 5): kk_img5,
-                (0, 5): kk_img6, (-5, 5): kk_img7,} 
+    kk_zisyo = {(-5, 0): kk_img_left, (-5, -5): kk_img_upper_left, 
+                (0, -5): kk_img_upper, (5, -5): kk_img_upper_right, 
+                (5, 0): kk_img_right, (5, 5): kk_img_lower_right,
+                (0, 5): kk_img_lower, (-5, 5): kk_img_lower_left} 
 
 
     clock = pg.time.Clock()
@@ -96,15 +103,16 @@ def main():
         #時間に合わせて爆弾の大きさを変える
         for i, img in enumerate(bd_imgs):
             tm = 100  #爆弾の大きさが変わる時間の単位
+            bd_img = img
             if i < 1:
                 if tmr <= tm*(i+1):
-                    screen.blit(bd_imgs[i], bd_rct)
+                    screen.blit(bd_img, bd_rct)
             elif i == len(bd_imgs)-1:
-                if tm*(i+1) <= tmr:
-                    screen.blit(bd_imgs[i], bd_rct)
+                if tm*(i-1) <= tmr:
+                    screen.blit(bd_img, bd_rct)
             else:
                 if tm*(i-1) < tmr and tmr <= tm*(i+1):
-                    screen.blit(bd_imgs[i], bd_rct)
+                    screen.blit(bd_img, bd_rct)
         #爆弾が画面外の場合、速度の符号を反転させる
         bd_rct.move_ip(vx,vy)
         if not check_bound(bd_rct)[0]:
