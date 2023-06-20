@@ -3,7 +3,7 @@ import pygame as pg
 import random
 
 
-WIDTH, HEIGHT = 1000, 600
+WIDTH, HEIGHT = 1600, 900
 #キーごとの移動量の辞書
 delta = {  
     pg.K_UP:[0, -5],
@@ -33,11 +33,11 @@ def main():
     bg_img = pg.image.load("ex02/fig/pg_bg.jpg")
     kk_img = pg.image.load("ex02/fig/3.png")
     kk_img = pg.transform.rotozoom(kk_img, 0, 2.0)
+    kk_rct = kk_img.get_rect()
+    kk_rct.center = 900, 400
     bd_img = pg.Surface((20, 20))  #練習
     pg.draw.circle(bd_img, (255, 0, 0), (10, 10), 10)
     bd_img.set_colorkey((0, 0, 0))
-    kk_rct = kk_img.get_rect()
-    kk_rct.center = 900, 400
     x = random.randint(0, WIDTH)
     y = random.randint(0, HEIGHT)
     vx = +5
@@ -54,28 +54,34 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+            
         key_lst = pg.key.get_pressed()
-        sum_mv = [0, 0]
+        sum_mv = [0, 0]  #合計移動量
         for k, mv in delta.items():
             if key_lst[k]:
                 sum_mv[0] += mv[0]
                 sum_mv[1] += mv[1]
-                kk_rct.move_ip(sum_mv)
+        kk_rct.move_ip(sum_mv)
 
         screen.blit(bg_img, [0, 0])
         screen.blit(kk_img, kk_rct)
-        screen.blit(bd_img, bd_rct)
-        bd_rct.move_ip(vx, vy)
         #こうかとんを更新前の位置に戻す
         if not check_bound(kk_rct)[0]:
             kk_rct.move_ip(-sum_mv[0], 0)
         if not check_bound(kk_rct)[1]:
             kk_rct.move_ip(0, -sum_mv[1])
+        bd_rct.move_ip(vx, vy)
         #爆弾が画面外の場合、速度の符号を反転させる
         if not check_bound(bd_rct)[0]:
             vx *= -1
         if not check_bound(bd_rct)[1]:
             vy *= -1
+        screen.blit(bd_img, bd_rct)
+
+        if kk_rct.colliderect(bd_rct):
+            print("ゲームオーバー")
+            event.type = pg.QUIT
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
